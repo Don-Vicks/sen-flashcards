@@ -1,9 +1,16 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { ALL_QUESTIONS } from "./lib/data/questions";
+
+interface Question {
+  q: string;
+  o: string[];
+  a: number;
+  t: string;
+}
 
 const TOPICS = ["All Topics", ...Array.from(new Set(ALL_QUESTIONS.map(q => q.t)))];
 const L = ["A", "B", "C", "D"];
-const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[b[i], b[j]] = [b[j], b[i]]; } return b; };
+const shuffle = (a: any[]) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 
 const S = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -107,23 +114,23 @@ html,body{background:var(--paper);color:var(--ink);font-family:'Outfit',sans-ser
 
 export default function App() {
   const [topic, setTopic] = useState("All Topics");
-  const [deck, setDeck] = useState([]);
+  const [deck, setDeck] = useState<Question[]>([]);
   const [idx, setIdx] = useState(0);
-  const [chosen, setChosen] = useState(null);
+  const [chosen, setChosen] = useState<number | null>(null);
   const [score, setScore] = useState({ c: 0, w: 0 });
   const [streak, setStreak] = useState(0);
   const [best, setBest] = useState(0);
   const [shaking, setShaking] = useState(false);
   const [mode, setMode] = useState("start");
 
-  const buildDeck = useCallback((t) => shuffle(t === "All Topics" ? ALL_QUESTIONS : ALL_QUESTIONS.filter(q => q.t === t)), []);
+  const buildDeck = useCallback((t: string) => shuffle(t === "All Topics" ? ALL_QUESTIONS : ALL_QUESTIONS.filter(q => q.t === t)), []);
 
   const begin = () => {
     setDeck(buildDeck(topic)); setIdx(0); setChosen(null);
     setScore({ c: 0, w: 0 }); setStreak(0); setBest(0); setMode("quiz");
   };
 
-  const pick = (i) => {
+  const pick = (i: number) => {
     if (chosen !== null) return;
     setChosen(i);
     const ok = i === deck[idx].a;
@@ -187,7 +194,7 @@ export default function App() {
   if (mode === "quiz" && cur) {
     const isOk = chosen !== null && chosen === cur.a;
     const isBad = chosen !== null && chosen !== cur.a;
-    const cls = (i) => {
+    const cls = (i: number) => {
       if (chosen === null) return "opt";
       if (i === cur.a && chosen === cur.a) return "opt c";
       if (i === chosen && chosen !== cur.a) return "opt w";
@@ -226,7 +233,7 @@ export default function App() {
           )}
 
           <div className="opts">
-            {cur.o.map((opt, i) => (
+            {cur.o.map((opt: string, i: number) => (
               <button key={i} className={cls(i)} onClick={() => pick(i)} disabled={chosen !== null}>
                 <span className="oletter">{L[i]}</span>
                 <span className="otext">{opt}</span>
@@ -263,7 +270,7 @@ export default function App() {
         <div className="e3">
           <div className="topic-label">Filter by topic</div>
           <div className="pills">
-            {TOPICS.map(t => (
+            {TOPICS.map((t: string) => (
               <button key={t} className={`pill${topic === t ? " on" : ""}`} onClick={() => setTopic(t)}>{t}</button>
             ))}
           </div>
